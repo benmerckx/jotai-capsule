@@ -14,6 +14,10 @@
     },
     "./package.json": "./package.json"
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "devDependencies": {
     "@alinea/suite": "^0.4.0",
     "@happy-dom/global-registrator": "^15.11.6",
