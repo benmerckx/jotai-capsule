@@ -1,7 +1,7 @@
 # jotai-capsule
 
 An alternative approach to scoping Jotai atoms.  
-A capsule is used as a namespace for atoms. 
+A capsule is used as a namespace for atoms.  
 By wrapping a component with a capsule provider, a new scope is created.
 
 ```tsx
