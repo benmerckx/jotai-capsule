@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "module": "index.ts",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benmerckx/jotai-capsule.git"
+  },
   "scripts": {
     "prepublishOnly": "tsc && bun build --no-bundle src/index.ts --outfile=dist/index.js"
   },
