@@ -1,4 +1,4 @@
-import type {WritableAtom} from 'jotai'
+import type {Getter, Setter, WritableAtom} from 'jotai'
 import {type Atom, Provider, useStore} from 'jotai'
 import {type FunctionComponent, type PropsWithChildren, useMemo} from 'react'
 import {jsx} from 'react/jsx-runtime'
@@ -18,11 +18,11 @@ export interface Capsule {
 }
 
 export function createCapsule(): Capsule {
-  const scopedAtoms: Set<Atom<unknown>> = new Set()
+  const needsScope: Set<Atom<unknown>> = new Set()
 
   return Object.assign(
     <ToScope extends JotaiAtom>(atom: ToScope): ToScope => {
-      scopedAtoms.add(atom)
+      needsScope.add(atom)
       return atom
     },
     {
@@ -42,27 +42,37 @@ export function createCapsule(): Capsule {
   )
 
   function createScope() {
-    const atomCache = new Map()
-    return function scope<Atom extends JotaiAtom>(atom: Atom): Atom {
-      if (!scopedAtoms.has(atom)) return atom
-      if (atomCache.has(atom)) return atomCache.get(atom)
-      const scoped: JotaiWriteableAtom = {
+    const scoped = new WeakMap() as {
+      get<In extends WeakKey>(key: In): In
+      set<In extends WeakKey>(key: In, value: In): unknown
+      has<In extends WeakKey>(key: In): boolean
+    }
+    const setScoped = <In extends WeakKey>(key: In, value: In) => (
+      scoped.set(key, value), value
+    )
+    const reader = (get: Getter) =>
+      scoped.get(get) ?? setScoped(get, atom => get(scope(atom)))
+    const writer = (set: Setter) =>
+      scoped.get(set) ??
+      setScoped(set, (atom, ...rest) => set(scope(atom), ...rest))
+    function scope<Atom extends JotaiAtom>(atom: Atom): Atom {
+      if (!needsScope.has(atom)) return atom
+      if (scoped.has(atom)) return scoped.get(atom)
+      const scopedAtom = <JotaiWriteableAtom>{
         ...atom,
         read(get, options) {
-          return atom.read(atom => get(scope(atom) ?? atom), <any>options)
+          return atom.read(reader(get), <any>options)
         },
         write(get, set, ...args) {
           const writeable = (<unknown>atom) as JotaiWriteableAtom
-          return writeable.write(
-            atom => get(scope(atom) ?? atom),
-            (atom, ...rest) => set(scope(atom) ?? atom, ...rest),
-            ...args
-          )
+          return writeable.write(reader(get), writer(set), ...args)
         }
       }
-      atomCache.set(atom, scoped)
-      return (<unknown>scoped) as Atom
+      const typedAtom = (<unknown>scopedAtom) as Atom
+      scoped.set(atom, typedAtom)
+      return typedAtom
     }
+    return scope
   }
 }
 

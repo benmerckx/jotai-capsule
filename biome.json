@@ -33,7 +33,8 @@
       "style": {
         "noNonNullAssertion": "off",
         "useEnumInitializers": "off",
-        "noParameterAssign": "off"
+        "noParameterAssign": "off",
+        "noCommaOperator": "off"
       },
       "complexity": {
         "noBannedTypes": "off"
