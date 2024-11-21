@@ -6,16 +6,12 @@ import {createCapsule} from '../src/index.ts'
 
 suite(import.meta, test => {
   test('readme', () => {
-    const capsule = createCapsule()
-    const nameAtom = capsule(atom(''))
-    const countAtom = capsule(atom(0))
+    const counterCapsule = createCapsule()
 
-    const CounterName = () => {
-      const name = useAtomValue(nameAtom)
-      return <div id={`name-${name}`}>name: {name}</div>
-    }
+    const nameAtom = counterCapsule(atom(''))
+    const countAtom = counterCapsule(atom(0))
 
-    const Counter = capsule.provide(({name}: {name: string}) => {
+    const Counter = counterCapsule.provide(({name}: {name: string}) => {
       useHydrateAtoms([[nameAtom, name]])
       const [count, setCount] = useAtom(countAtom)
       return (
@@ -32,6 +28,11 @@ suite(import.meta, test => {
         </div>
       )
     })
+
+    const CounterName = () => {
+      const name = useAtomValue(nameAtom)
+      return <div id={`name-${name}`}>name: {name}</div>
+    }
 
     const App = () => (
       <div>

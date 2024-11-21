@@ -1,22 +1,19 @@
 # jotai-capsule
 
-An alternative approach to scoping Jotai atoms. A capsule is used as a namespace
-for atoms for which you can provide a new scope.
+An alternative approach to scoping Jotai atoms.  
+A capsule is used as a namespace for atoms. 
+By wrapping a component with a capsule provider, a new scope is created.
 
 ```tsx
 import {atom} from 'jotai'
 import {createCapsule} from 'jotai-capsule'
 
-const capsule = createCapsule()
-const nameAtom = capsule(atom(''))
-const countAtom = capsule(atom(0))
+const counterCapsule = createCapsule()
 
-const CounterName = () => {
-  const name = useAtomValue(nameAtom)
-  return <div>name: {name}</div>
-}
+const nameAtom = counterCapsule(atom(''))
+const countAtom = counterCapsule(atom(0))
 
-const Counter = capsule.provide(({name}) => {  
+const Counter = counterCapsule.provide(({name}) => {  
   useHydrateAtoms([
     [nameAtom, name]
   ])
@@ -29,6 +26,11 @@ const Counter = capsule.provide(({name}) => {
     </div>
   )
 })
+
+const CounterName = () => {
+  const name = useAtomValue(nameAtom)
+  return <div>name: {name}</div>
+}
 
 const App = () => (
   <div>
